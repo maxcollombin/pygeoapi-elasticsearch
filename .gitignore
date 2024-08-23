@@ -1,0 +1,5 @@
+data/_state
+data/indices
+data/snapshot_cache
+data/node.lock
+data/nodes
