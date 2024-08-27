@@ -28,3 +28,6 @@ You can retrieve a document with a specific id from the index with the following
 ```bash
 curl -X GET "http://localhost:9200/$INDEX_NAME/_doc/$DOCUMENT_ID?pretty"
 ```
+
+> [!NOTE]
+The data_loader.py script is currently limited to geojson files.
