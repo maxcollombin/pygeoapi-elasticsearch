@@ -1,38 +1,74 @@
 import json
-import requests
+import yaml
+from pathlib import Path
+from elasticsearch import Elasticsearch, helpers
 
-# Create an index in Elasticsearch
-index_name = "geojson_index"
-index_url = f"http://localhost:9200/{index_name}"
-index_mapping = {
-    "mappings": {
-        "properties": {
-            "location": {
-                "type": "geo_shape"
+# Load configuration from config.yml file
+with open('elastic-config.yml', 'r', encoding='utf-8') as config_file:
+    config = yaml.safe_load(config_file)
+
+# Initialize Elasticsearch client
+es = Elasticsearch('http://elasticsearch:9200')
+
+for file_config in config['files']:
+    geojson_file = file_config['path']
+    id_field = file_config['id_field']
+    index_name = Path(geojson_file).stem.lower()
+
+    # Read the GeoJSON file to determine the geometry type
+    with open(geojson_file, 'r', encoding='utf-8') as file:
+        geojson_data = json.load(file)
+        first_feature = geojson_data['features'][0]
+        geometry_type = first_feature['geometry']['type']
+
+    # Delete the index if it already exists
+    if es.indices.exists(index=index_name):
+        es.indices.delete(index=index_name)
+
+    # Define index settings and mappings
+    settings = {
+        'number_of_shards': 1,
+        'number_of_replicas': 0
+    }
+
+    mappings = {
+        'properties': {
+            'geometry': {
+                'type': 'geo_shape'
+            },
+            'properties': {
+                'properties': {
+                    'nameascii': {
+                        'type': 'text',
+                        'fields': {
+                            'raw': {
+                                'type': 'keyword'
+                            }
+                        }
+                    }
+                }
             }
         }
     }
-}
 
-response = requests.put(index_url, json=index_mapping)
-print(response.status_code, response.text)
+    # Create the index
+    es.indices.create(index=index_name, settings=settings, mappings=mappings)
 
-# Path to your GeoJSON file
-geojson_file = 'data/ne_110m_populated_places_simple.geojson'
+    # Generator function to yield features
+    def gendata(data):
+        for feature in data['features']:
+            if id_field in feature:
+                try:
+                    feature[id_field] = int(feature[id_field])
+                except ValueError:
+                    pass
+                yield {
+                    "_index": index_name,
+                    "_id": feature[id_field],
+                    "_source": feature
+                }
+            else:
+                print(f"Warning: ID field '{id_field}' not found in feature")
 
-# Read the GeoJSON file
-with open(geojson_file, 'r') as file:
-    geojson_data = json.load(file)
-
-# Elasticsearch URL
-es_url = "http://localhost:9200/geojson_index/_doc"
-
-# Iterate through each feature in the GeoJSON file and post it to Elasticsearch
-for feature in geojson_data['features']:
-    # You might need to modify this if your GeoJSON structure is different
-    document = {
-        "location": feature['geometry'],
-        "properties": feature['properties']
-    }
-    response = requests.post(es_url, json=document)
-    print(response.status_code, response.text)
+    # Index the data
+    helpers.bulk(es, gendata(geojson_data))

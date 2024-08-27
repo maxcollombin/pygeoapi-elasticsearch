@@ -1,0 +1,3 @@
+files:
+  - path: data/ne_110m_populated_places_simple.geojson
+    id_field: id
