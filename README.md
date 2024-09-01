@@ -24,7 +24,8 @@ Get the first item of the `ne_110m_populated_places_simple` collection:
 curl -X GET http://localhost:5000/collections/ne_110m_populated_places_simple/items/0 | jq 'del(.links)' > output.geojson
 ```
 
-> [!NOTE] The `jq` command is used to retrieve the response without the `links` object.
+> [!NOTE]
+The `jq` command is used to retrieve the response without the `links` object.
 
 ### DELETE operation
 
@@ -46,7 +47,8 @@ Update the first item of the `ne_110m_populated_places_simple` collection:
 curl -X PUT -H "Content-Type: application/json" -d @output.geojson http://localhost:5000/collections/ne_110m_populated_places_simple/items/186
 ```
 
-> [!IMPORTANT] The `PUT` operation requires the whole item content to be sent in the request body.
+> [!IMPORTANT]
+The `PUT` operation requires the whole item content to be sent in the request body.
 
 ### PATCH operation
 
