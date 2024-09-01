@@ -1,33 +1,53 @@
-# Basic elasticsearch docker setup
+# pygeoapi demo with elasticsearch
 
-This is a basic setup for elasticsearch with docker and a python script to index a geojson file.
+This is a demo of pygeoapi with elasticsearch as the data provider.
 
-## Access Elasticsearch indices
-
-You can access the elasticsearch indices at:
-
-`http://localhost:9200/_cat/indices?v`
-
-## Retrieve documents from the index
-
-You can retrieve documents from the index using the following commands (replace `$INDEX_NAME` with the name of the index you created):
+## Start the containers
 
 ```bash
-curl -X GET "http://localhost:9200/$INDEX_NAME/_search?pretty" -H 'Content-Type: application/json' -d'
-{
-  "query": {
-    "match_all": {}
-  }
-}'
+docker compose up --build -d
 ```
 
-## Retrieve a document with a specific id
+## Access the pygeoapi endpoint
 
-You can retrieve a document with a specific id from the index with the following command (replace `$INDEX_NAME` with the name of the index you created and `$DOCUMENT_ID` with the id of the document you want to retrieve):
+The API is available at [http://localhost:5000](http://localhost:5000)
+
+## CRUD operations
+
+Elasticsearch is one on the two pygeoapi data providers that support CRUD operations (see [pygeoapi documentation](https://docs.pygeoapi.io/en/latest/data-publishing/ogcapi-features.html#ogcapi-features) for more information).
+
+### GET operation
+
+Get the first item of the `ne_110m_populated_places_simple` collection:
 
 ```bash
-curl -X GET "http://localhost:9200/$INDEX_NAME/_doc/$DOCUMENT_ID?pretty"
+curl -X GET http://localhost:5000/collections/ne_110m_populated_places_simple/items/0 | jq 'del(.links)' > output.geojson
 ```
 
-> [!NOTE]
-The data_loader.py script is currently limited to geojson files.
+> [!NOTE] The `jq` command is used to retrieve the response without the `links` object.
+
+### DELETE operation
+
+Delete the first item of the `ne_110m_populated_places_simple` collection:
+
+```bash
+curl -X DELETE http://localhost:5000/collections/ne_110m_populated_places_simple/items/0
+```
+
+### POST operation
+
+Add the deleted item back to the `ne_110m_populated_places_simple` collection:
+
+### PUT operation
+
+Update the first item of the `ne_110m_populated_places_simple` collection:
+
+```bash
+curl -X PUT -H "Content-Type: application/json" -d @output.geojson http://localhost:5000/collections/ne_110m_populated_places_simple/items/186
+```
+
+> [!IMPORTANT] The `PUT` operation requires the whole item content to be sent in the request body.
+
+### PATCH operation
+
+The `PATCH` operation is not supported by the elasticsearch data provider.

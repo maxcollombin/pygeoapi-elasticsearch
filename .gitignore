@@ -3,3 +3,4 @@ data/indices
 data/snapshot_cache
 data/node.lock
 data/nodes
+output.geojson

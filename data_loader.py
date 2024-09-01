@@ -4,7 +4,7 @@ from pathlib import Path
 from elasticsearch import Elasticsearch, helpers
 
 # Load configuration from config.yml file
-with open('elastic-config.yml', 'r', encoding='utf-8') as config_file:
+with open('elastic.config.yml', 'r', encoding='utf-8') as config_file:
     config = yaml.safe_load(config_file)
 
 # Initialize Elasticsearch client
@@ -57,18 +57,26 @@ for file_config in config['files']:
     # Generator function to yield features
     def gendata(data):
         for feature in data['features']:
-            if id_field in feature:
-                try:
-                    feature[id_field] = int(feature[id_field])
-                except ValueError:
-                    pass
-                yield {
-                    "_index": index_name,
-                    "_id": feature[id_field],
-                    "_source": feature
-                }
+            # Check if the ID field is in the properties or as a direct id
+            if id_field in feature['properties']:
+                feature_id = feature['properties'][id_field]
+            elif id_field in feature:
+                feature_id = feature[id_field]
             else:
                 print(f"Warning: ID field '{id_field}' not found in feature")
+                continue
+
+            try:
+                feature_id = int(feature_id)
+            except ValueError:
+                pass
+
+            yield {
+                "_index": index_name,
+                "_id": feature_id,
+                "_source": feature
+            }
 
     # Index the data
     helpers.bulk(es, gendata(geojson_data))
+    
