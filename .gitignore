@@ -1,6 +1,6 @@
-app/data/_state
-app/data/indices
-app/data/snapshot_cache
-app/data/node.lock
-app/data/nodes
+elasticsearch/data/_state
+elasticsearch/data/indices
+elasticsearch/data/snapshot_cache
+elasticsearch/data/node.lock
+elasticsearch/data/nodes
 output.geojson
