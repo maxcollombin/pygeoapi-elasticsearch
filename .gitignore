@@ -1,6 +1,6 @@
-data/_state
-data/indices
-data/snapshot_cache
-data/node.lock
-data/nodes
+app/data/_state
+app/data/indices
+app/data/snapshot_cache
+app/data/node.lock
+app/data/nodes
 output.geojson
