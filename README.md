@@ -5,7 +5,13 @@ This is a demo of pygeoapi with elasticsearch as the data provider.
 ## Start the containers
 
 ```bash
-docker compose up --build -d
+./start.sh
+```
+
+## Stop the containers
+
+```bash
+./stop.sh
 ```
 
 ## Access the pygeoapi endpoint
