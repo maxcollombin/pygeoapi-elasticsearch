@@ -1,0 +1,20 @@
+{
+    "properties": {
+        "geometry": {
+            "type": "geo_shape"
+        },
+        "properties": {
+            "type": "object",
+            "properties": {
+                "nameascii": {
+                    "type": "text",
+                    "fields": {
+                        "raw": {
+                            "type": "keyword"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

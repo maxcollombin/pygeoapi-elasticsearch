@@ -22,6 +22,7 @@ services:
       start_period: 40s
   app:
     image: python:alpine3.20
+    # image: ghcr.io/andrii-rieznik/python-gdal:latest
     container_name: app
     volumes:
       - ./elasticsearch:/app
